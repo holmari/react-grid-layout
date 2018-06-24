@@ -163,7 +163,9 @@ export default class ReactGridLayout extends React.Component<Props, State> {
     onLayoutChange: PropTypes.func,
 
     // Calls when drag starts. Callback is of the signature (layout, oldItem, newItem, placeholder, e, ?node).
-    // All callbacks below have the same signature. 'start' and 'stop' callbacks omit the 'placeholder'.
+    // All callbacks below have the same signature. 'start' and 'stop' callbacks omit the 'placeholder',
+    // and have an optional return value of type GridLayout.Layout[], which can be passed if the layout
+    // is modified in the callback.
     onDragStart: PropTypes.func,
     // Calls on each drag movement.
     onDrag: PropTypes.func,
@@ -408,7 +410,7 @@ export default class ReactGridLayout extends React.Component<Props, State> {
       cols
     );
 
-    this.props.onDragStop(layout, oldDragItem, l, null, e, node);
+    layout = this.props.onDragStop(layout, oldDragItem, l, null, e, node) || layout;
 
     // Set state
     const newLayout = compact(layout, this.compactType(), cols);
@@ -499,11 +501,12 @@ export default class ReactGridLayout extends React.Component<Props, State> {
   }
 
   onResizeStop(i: string, w: number, h: number, { e, node }: GridResizeEvent) {
-    const { layout, oldResizeItem } = this.state;
+    const oldResizeItem = this.state.oldResizeItem;
     const { cols } = this.props;
+    let layout = this.state.layout;
     var l = getLayoutItem(layout, i);
 
-    this.props.onResizeStop(layout, oldResizeItem, l, null, e, node);
+    layout = this.props.onResizeStop(layout, oldResizeItem, l, null, e, node) || layout;
 
     // Set state
     const newLayout = compact(layout, this.compactType(), cols);
